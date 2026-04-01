@@ -73,6 +73,26 @@ async function init() {
   initTheme();
   dom.toggleThemeBtn.addEventListener('click', toggleTheme);
 
+  // 关于弹窗 — 从 config.json 读取版本号
+  try {
+    const res = await fetch('./config.json');
+    const config = await res.json();
+    dom.aboutAppVersion.textContent = 'v' + config.version;
+  } catch {
+    dom.aboutAppVersion.textContent = '';
+  }
+  dom.aboutBtn.addEventListener('click', () => {
+    dom.aboutModalOverlay.classList.remove('hidden');
+  });
+  dom.aboutModalClose.addEventListener('click', () => {
+    dom.aboutModalOverlay.classList.add('hidden');
+  });
+  dom.aboutModalOverlay.addEventListener('click', (e) => {
+    if (e.target === dom.aboutModalOverlay) {
+      dom.aboutModalOverlay.classList.add('hidden');
+    }
+  });
+
   // 大纲关闭
   dom.closeOutlineBtn.addEventListener('click', () => {
     dom.outlinePanel.classList.add('hidden');

@@ -57,6 +57,13 @@
               <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
             </svg>
           </button>
+          <button class="activity-bar-item" id="aboutBtn" title="关于本项目">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="16" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+          </button>
 
         </div>
       </div>
@@ -201,6 +208,55 @@
         <span class="status-item" id="statusWordCount">字数: --</span>
         <span class="status-item" id="statusEncoding">UTF-8</span>
         <span class="status-item" id="statusType">--</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- About Modal -->
+  <div class="about-modal-overlay hidden" id="aboutModalOverlay">
+    <div class="about-modal">
+      <div class="about-modal-header">
+        <span class="about-modal-title">关于 MD Reader</span>
+        <button class="about-modal-close" id="aboutModalClose" title="关闭">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="about-modal-body">
+        <div class="about-app-icon">📖</div>
+        <h2 class="about-app-name">MD Reader</h2>
+        <span class="about-app-version" id="aboutAppVersion"></span>
+        <p class="about-app-desc">一款简洁优雅的 Markdown / TXT / PDF 阅读器</p>
+        <div class="about-info-list">
+          <div class="about-info-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            <span class="about-info-label">开发者</span>
+            <span class="about-info-value">cqy</span>
+          </div>
+          <div class="about-info-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+              <polyline points="22,6 12,13 2,6"></polyline>
+            </svg>
+            <span class="about-info-label">邮箱</span>
+            <a class="about-info-link" href="mailto:qyu_cheng@163.com">qyu_cheng@163.com</a>
+          </div>
+          <div class="about-info-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+            </svg>
+            <span class="about-info-label">GitHub</span>
+            <a class="about-info-link" href="https://github.com/cqy/mdReader" target="_blank">cqy/mdReader</a>
+          </div>
+        </div>
+      </div>
+      <div class="about-modal-footer">
+        <span class="about-copyright">Made with ❤️ by cqy</span>
       </div>
     </div>
   </div>

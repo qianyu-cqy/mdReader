@@ -30,6 +30,10 @@ const dom = {
   get welcomeOpenBtn() { return document.getElementById('welcomeOpenBtn'); },
   get clearHistoryBtn() { return document.getElementById('clearHistoryBtn'); },
   get toggleThemeBtn() { return document.getElementById('toggleThemeBtn'); },
+  get aboutBtn() { return document.getElementById('aboutBtn'); },
+  get aboutModalOverlay() { return document.getElementById('aboutModalOverlay'); },
+  get aboutModalClose() { return document.getElementById('aboutModalClose'); },
+  get aboutAppVersion() { return document.getElementById('aboutAppVersion'); },
   get modeToggleBtn() { return document.getElementById('modeToggleBtn'); },
 
   // History
