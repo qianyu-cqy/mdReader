@@ -4,21 +4,24 @@ import { initTheme, toggleTheme } from './theme.js';
 import { togglePanel, showPanel } from './sidebar.js';
 import { setupSashResize } from './sash.js';
 import { onContentScroll } from './outline.js';
-import { refreshHistory, clearAllHistory, setLoadFileCallback } from './history.js';
-import { openFile, loadFile } from './file-loader.js';
-import { closeCurrentTab } from './tab.js';
+import { refreshHistory, clearAllHistory, setLoadFileCallback, setCloseTabCallback } from './history.js';
+import { openFile, loadFile, reloadTab } from './file-loader.js';
+import { closeCurrentTab, closeTab, initTabBar, setTabCallbacks, updateTabDirtyState } from './tab.js';
 import { setupKeyboard } from './keyboard.js';
 import { setupDragDrop } from './dragdrop.js';
 import { initMarked } from './renderers/markdown.js';
-import { toggleMode, checkUnsavedChanges, saveCurrentFile } from './source-mode.js';
+import { toggleMode, saveCurrentFile, setDirtyCallback } from './source-mode.js';
 
 // ===== 初始化 =====
 async function init() {
   // 初始化 marked
   initMarked();
 
-  // 注入 loadFile 回调到 history 模块（解决循环依赖）
+  // 注入回调（解决循环依赖）
   setLoadFileCallback(loadFile);
+  setTabCallbacks(openFile, reloadTab);
+  setDirtyCallback(updateTabDirtyState);
+  setCloseTabCallback(closeTab);
 
   // 根据平台调整 UI
   const isWindows = window.electronAPI.platform === 'win32';
@@ -59,15 +62,18 @@ async function init() {
     dom.activityOutline.classList.remove('active');
   });
 
-  // 标签页关闭
-  const tabCloseBtn = dom.welcomeTab.querySelector('.editor-tab-close');
-  tabCloseBtn.addEventListener('click', async (e) => {
-    e.stopPropagation();
-    const canClose = await checkUnsavedChanges();
-    if (canClose) {
-      closeCurrentTab();
-    }
-  });
+  // 初始化多标签栏
+  initTabBar();
+
+  // 非 macOS 平台需要渲染进程处理 Ctrl+W（macOS 通过菜单 accelerator 处理）
+  if (window.electronAPI.platform !== 'darwin') {
+    document.addEventListener('keydown', async (e) => {
+      if (e.ctrlKey && e.key === 'w') {
+        e.preventDefault();
+        await closeCurrentTab();
+      }
+    });
+  }
 
   // Sash 拖拽
   setupSashResize(dom.sidebarSash, dom.primarySidebar, 'left', 150, 450);
@@ -86,9 +92,15 @@ async function init() {
     await saveCurrentFile();
   });
 
+  // 菜单关闭标签
+  window.electronAPI.onCloseTab(async () => {
+    await closeCurrentTab();
+  });
+
   // 窗口关闭前检查未保存修改
   window.addEventListener('beforeunload', (e) => {
-    if (state.isDirty) {
+    const hasUnsaved = state.tabs.some(t => t.isDirty) || state.isDirty;
+    if (hasUnsaved) {
       e.preventDefault();
       e.returnValue = '';
     }

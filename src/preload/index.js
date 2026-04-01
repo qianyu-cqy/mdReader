@@ -11,6 +11,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   openFileDialog: () => ipcRenderer.invoke('open-file-dialog'),
   onOpenFile: (callback) => ipcRenderer.on('open-file', (event, path) => callback(path)),
   onSaveFile: (callback) => ipcRenderer.on('save-file', () => callback()),
+  onCloseTab: (callback) => ipcRenderer.on('close-tab', () => callback()),
   getPathForFile: (file) => webUtils.getPathForFile(file),
+  showUnsavedDialog: (fileName) => ipcRenderer.invoke('show-unsaved-dialog', fileName),
   platform: process.platform  // 'darwin', 'win32', 'linux'
 });

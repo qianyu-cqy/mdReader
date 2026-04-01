@@ -53,7 +53,13 @@ function createMenu(mainWindow) {
         },
         { type: 'separator' },
         ...(isMac ? [
-          { label: '关闭窗口', role: 'close' }
+          {
+            label: '关闭标签页',
+            accelerator: 'Cmd+W',
+            click: () => {
+              mainWindow.webContents.send('close-tab');
+            }
+          }
         ] : [
           { label: '退出', role: 'quit' }
         ])

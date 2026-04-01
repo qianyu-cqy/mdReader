@@ -4,6 +4,16 @@ import { renderMarkdown } from './renderers/markdown.js';
 import { updateStatusBar } from './statusbar.js';
 import { getFileName } from './utils.js';
 
+// 延迟注入的 updateTabDirtyState 回调（避免循环依赖）
+let _updateTabDirtyState = null;
+
+/**
+ * 注入 tab 脏标记更新函数（由 index.js 在初始化时调用）
+ */
+export function setDirtyCallback(fn) {
+  _updateTabDirtyState = fn;
+}
+
 // 模式记忆存储 key
 const MODE_MEMORY_KEY = 'md-reader-mode-memory';
 
@@ -193,30 +203,29 @@ export async function saveCurrentFile() {
 export async function checkUnsavedChanges() {
   if (!state.isDirty) return true;
 
-  const result = confirm('当前文件有未保存的修改，是否保存？\n\n点击"确定"保存，点击"取消"放弃修改。');
-  if (result) {
+  const fileName = getFileName(state.currentPath) || '未命名文件';
+  // 0=保存, 1=放弃, 2=取消
+  const response = await window.electronAPI.showUnsavedDialog(fileName);
+
+  if (response === 0) {
+    // 用户点击"保存"
     return await saveCurrentFile();
+  } else if (response === 1) {
+    // 用户点击"放弃"
+    state.isDirty = false;
+    updateDirtyIndicator();
+    return true;
   }
-  // 用户选择不保存，丢弃修改
-  state.isDirty = false;
-  updateDirtyIndicator();
-  return true;
+  // 用户点击"取消"
+  return false;
 }
 
 /**
  * 更新标签页上的脏标记
  */
 function updateDirtyIndicator() {
-  const tabLabel = dom.welcomeTab.querySelector('.editor-tab-label');
-  if (!tabLabel) return;
-
-  const fileName = getFileName(state.currentPath);
-  if (state.isDirty) {
-    tabLabel.textContent = '● ' + fileName;
-    dom.welcomeTab.classList.add('dirty');
-  } else {
-    tabLabel.textContent = fileName;
-    dom.welcomeTab.classList.remove('dirty');
+  if (_updateTabDirtyState) {
+    _updateTabDirtyState();
   }
 }
 

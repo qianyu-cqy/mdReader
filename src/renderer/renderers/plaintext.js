@@ -1,7 +1,7 @@
 import dom from '../dom.js';
 import state from '../state.js';
 import { getFileName } from '../utils.js';
-import { updateEditorTab } from '../tab.js';
+import { updateEditorTab, updateTabDirtyState } from '../tab.js';
 import { clearOutline } from '../outline.js';
 import { updateStatusBar } from '../statusbar.js';
 import { initTxtEditMode } from '../source-mode.js';
@@ -74,15 +74,5 @@ export function renderPlainText(text, filePath) {
  * 更新标签页上的脏标记（txt 专用，与 source-mode 中的逻辑一致）
  */
 function updateDirtyIndicator() {
-  const tabLabel = dom.welcomeTab.querySelector('.editor-tab-label');
-  if (!tabLabel) return;
-
-  const fileName = getFileName(state.currentPath);
-  if (state.isDirty) {
-    tabLabel.textContent = '● ' + fileName;
-    dom.welcomeTab.classList.add('dirty');
-  } else {
-    tabLabel.textContent = fileName;
-    dom.welcomeTab.classList.remove('dirty');
-  }
+  updateTabDirtyState();
 }

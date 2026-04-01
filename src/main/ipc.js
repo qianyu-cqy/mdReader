@@ -55,10 +55,10 @@ function registerIpcHandlers(mainWindow) {
     return filtered;
   });
 
-  // 打开文件对话框
+  // 打开文件对话框（支持多选）
   ipcMain.handle('open-file-dialog', async () => {
     const result = await dialog.showOpenDialog(mainWindow, {
-      properties: ['openFile'],
+      properties: ['openFile', 'multiSelections'],
       filters: [
         { name: '所有支持的文件', extensions: ['md', 'markdown', 'txt', 'pdf'] },
         { name: 'Markdown', extensions: ['md', 'markdown'] },
@@ -67,7 +67,7 @@ function registerIpcHandlers(mainWindow) {
       ]
     });
     if (!result.canceled && result.filePaths.length > 0) {
-      return result.filePaths[0];
+      return result.filePaths;
     }
     return null;
   });
@@ -90,6 +90,20 @@ function registerIpcHandlers(mainWindow) {
     } catch (error) {
       return { success: false, error: error.message };
     }
+  });
+
+  // 未保存修改确认弹窗
+  ipcMain.handle('show-unsaved-dialog', async (event, fileName) => {
+    const result = await dialog.showMessageBox(mainWindow, {
+      type: 'warning',
+      title: '未保存的修改',
+      message: `"${fileName}" 有未保存的修改，是否保存？`,
+      buttons: ['保存', '放弃', '取消'],
+      defaultId: 0,
+      cancelId: 2,
+    });
+    // result.response: 0=保存, 1=放弃, 2=取消
+    return result.response;
   });
 }
 

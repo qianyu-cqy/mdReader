@@ -24,7 +24,6 @@ const dom = {
   get breadcrumbBar() { return document.getElementById('breadcrumbBar'); },
   get content() { return document.getElementById('content'); },
   get currentPathDisplay() { return document.getElementById('currentPath'); },
-  get welcomeTab() { return document.getElementById('welcomeTab'); },
 
   // Buttons
   get openFileBtn() { return document.getElementById('openFileBtn'); },

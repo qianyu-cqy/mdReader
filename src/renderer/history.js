@@ -1,9 +1,19 @@
 import dom from './dom.js';
 import state from './state.js';
 import { escapeHtml, getFileIcon } from './utils.js';
+import { findTabByPath } from './state.js';
 
 // 延迟导入，避免循环依赖
 let _loadFile = null;
+let _closeTab = null;
+
+/**
+ * 设置关闭标签回调（由 index.js 在初始化时调用，解决循环依赖）
+ * @param {Function} closeTabFn
+ */
+export function setCloseTabCallback(closeTabFn) {
+  _closeTab = closeTabFn;
+}
 
 /**
  * 设置文件加载回调（由 file-loader 在初始化时调用，解决循环依赖）
@@ -36,6 +46,7 @@ function renderHistory(history) {
   history.forEach(item => {
     const el = document.createElement('div');
     el.className = 'history-item';
+    el.setAttribute('data-path', item.path);
     if (item.path === state.currentPath) {
       el.classList.add('active');
     }
@@ -75,6 +86,12 @@ function renderHistory(history) {
     const deleteBtn = el.querySelector('.history-item-delete');
     deleteBtn.addEventListener('click', async (e) => {
       e.stopPropagation();
+      // 如果该文件有对应的标签页，先关闭它
+      const tab = findTabByPath(item.path);
+      if (tab && _closeTab) {
+        const closed = await _closeTab(tab.id);
+        if (!closed) return; // 用户取消了（有未保存修改）
+      }
       await window.electronAPI.removeHistory(item.path);
       await refreshHistory();
     });

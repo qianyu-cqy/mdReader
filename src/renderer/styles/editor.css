@@ -22,6 +22,7 @@
   display: flex;
   overflow-x: auto;
   scrollbar-width: none;
+  flex: 1;
 }
 
 .editor-tabs-scroll::-webkit-scrollbar {
@@ -32,7 +33,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 0 12px;
+  padding: 0 8px 0 12px;
   height: 35px;
   font-size: 12px;
   color: var(--tab-inactive-fg);
@@ -44,6 +45,8 @@
   position: relative;
   min-width: 0;
   max-width: 200px;
+  flex-shrink: 0;
+  user-select: none;
 }
 
 .editor-tab:hover {
@@ -86,15 +89,25 @@
   border-radius: 3px;
   color: var(--tab-inactive-fg);
   cursor: pointer;
-  opacity: 0.7;
+  opacity: 0;
   transition: var(--transition);
   flex-shrink: 0;
-  margin-left: 4px;
+  margin-left: 2px;
+}
+
+.editor-tab:hover .editor-tab-close,
+.editor-tab.active .editor-tab-close {
+  opacity: 0.7;
 }
 
 .editor-tab-close:hover {
   background: var(--bg-hover);
   opacity: 1;
+}
+
+/* 脏标记样式 */
+.editor-tab.dirty .editor-tab-label {
+  font-style: italic;
 }
 
 /* Breadcrumb */

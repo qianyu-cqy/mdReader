@@ -35,9 +35,11 @@ export function setupDragDrop() {
 
     const files = e.dataTransfer.files;
     if (files.length > 0) {
-      const file = files[0];
-      const filePath = window.electronAPI.getPathForFile(file);
-      await loadFile(filePath);
+      // 支持同时拖入多个文件，每个文件打开为一个标签页
+      for (let i = 0; i < files.length; i++) {
+        const filePath = window.electronAPI.getPathForFile(files[i]);
+        await loadFile(filePath);
+      }
     }
   });
 }

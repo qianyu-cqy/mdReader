@@ -1,6 +1,7 @@
 import dom from './dom.js';
 import state from './state.js';
 import { togglePanel, showPanel, setActivityActive } from './sidebar.js';
+import { saveCurrentFile } from './source-mode.js';
 
 /**
  * 注册键盘快捷键
@@ -8,6 +9,12 @@ import { togglePanel, showPanel, setActivityActive } from './sidebar.js';
 export function setupKeyboard() {
   document.addEventListener('keydown', (e) => {
     const isMod = e.metaKey || e.ctrlKey;
+
+    // Cmd/Ctrl + S → 保存文件
+    if (isMod && e.key === 's') {
+      e.preventDefault();
+      saveCurrentFile();
+    }
 
     // Cmd/Ctrl + B → 切换侧边栏
     if (isMod && e.key === 'b') {
