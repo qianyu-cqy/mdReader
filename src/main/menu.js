@@ -44,6 +44,13 @@ function createMenu(mainWindow) {
             }
           }
         },
+        {
+          label: '保存',
+          accelerator: 'CmdOrCtrl+S',
+          click: () => {
+            mainWindow.webContents.send('save-file');
+          }
+        },
         { type: 'separator' },
         ...(isMac ? [
           { label: '关闭窗口', role: 'close' }

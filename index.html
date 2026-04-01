@@ -134,6 +134,15 @@
         <!-- Breadcrumb Bar -->
         <div class="breadcrumb-bar" id="breadcrumbBar">
           <span id="currentPath" class="breadcrumb-text">MD Reader</span>
+          <div class="breadcrumb-actions">
+            <button class="mode-toggle-btn hidden" id="modeToggleBtn" title="切换源码模式">
+              <svg class="icon-source" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="16 18 22 12 16 6"></polyline>
+                <polyline points="8 6 2 12 8 18"></polyline>
+              </svg>
+              <span class="mode-label">源码</span>
+            </button>
+          </div>
         </div>
 
         <!-- Editor Content -->
@@ -155,6 +164,10 @@
               <div class="welcome-shortcut-row">
                 <span class="welcome-shortcut-label">打开文件</span>
                 <kbd>⌘ O</kbd>
+              </div>
+              <div class="welcome-shortcut-row">
+                <span class="welcome-shortcut-label">保存文件</span>
+                <kbd>⌘ S</kbd>
               </div>
               <div class="welcome-shortcut-row">
                 <span class="welcome-shortcut-label">切换侧栏</span>

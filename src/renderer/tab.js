@@ -3,6 +3,7 @@ import state from './state.js';
 import { clearOutline } from './outline.js';
 import { resetStatusBar } from './statusbar.js';
 import { openFile } from './file-loader.js';
+import { resetSourceMode } from './source-mode.js';
 
 /**
  * 更新编辑器标签页
@@ -19,6 +20,9 @@ export function updateEditorTab(fileName, icon) {
  * 关闭当前标签页，恢复欢迎页
  */
 export function closeCurrentTab() {
+  // 重置源码模式
+  resetSourceMode();
+
   // 重置状态
   state.currentPath = '';
   state.currentFileType = '';
@@ -51,6 +55,10 @@ export function closeCurrentTab() {
         <div class="welcome-shortcut-row">
           <span class="welcome-shortcut-label">打开文件</span>
           <kbd>⌘ O</kbd>
+        </div>
+        <div class="welcome-shortcut-row">
+          <span class="welcome-shortcut-label">保存文件</span>
+          <kbd>⌘ S</kbd>
         </div>
         <div class="welcome-shortcut-row">
           <span class="welcome-shortcut-label">切换侧栏</span>

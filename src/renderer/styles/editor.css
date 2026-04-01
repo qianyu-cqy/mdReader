@@ -101,6 +101,7 @@
 .breadcrumb-bar {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   padding: 0 16px;
   height: 22px;
   min-height: 22px;
@@ -115,6 +116,59 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+}
+
+.breadcrumb-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+/* Mode Toggle Button */
+.mode-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 8px;
+  height: 18px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--breadcrumb-fg);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+
+.mode-toggle-btn:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+  border-color: var(--accent);
+}
+
+.mode-toggle-btn.active {
+  color: var(--accent);
+  background: var(--accent-glow);
+  border-color: var(--accent);
+}
+
+.mode-toggle-btn.hidden {
+  display: none;
+}
+
+.mode-toggle-btn .icon-source {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+}
+
+.mode-toggle-btn .mode-label {
+  line-height: 1;
 }
 
 /* ===== Editor Content ===== */

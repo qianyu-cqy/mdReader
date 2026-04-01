@@ -10,6 +10,7 @@ import { closeCurrentTab } from './tab.js';
 import { setupKeyboard } from './keyboard.js';
 import { setupDragDrop } from './dragdrop.js';
 import { initMarked } from './renderers/markdown.js';
+import { toggleMode, checkUnsavedChanges, saveCurrentFile } from './source-mode.js';
 
 // ===== 初始化 =====
 async function init() {
@@ -29,6 +30,9 @@ async function init() {
   // 文件打开按钮
   dom.openFileBtn.addEventListener('click', openFile);
   dom.welcomeOpenBtn.addEventListener('click', openFile);
+
+  // 模式切换按钮
+  dom.modeToggleBtn.addEventListener('click', toggleMode);
 
   // Activity bar 面板切换
   dom.activityExplorer.addEventListener('click', () => togglePanel('explorer'));
@@ -57,9 +61,12 @@ async function init() {
 
   // 标签页关闭
   const tabCloseBtn = dom.welcomeTab.querySelector('.editor-tab-close');
-  tabCloseBtn.addEventListener('click', (e) => {
+  tabCloseBtn.addEventListener('click', async (e) => {
     e.stopPropagation();
-    closeCurrentTab();
+    const canClose = await checkUnsavedChanges();
+    if (canClose) {
+      closeCurrentTab();
+    }
   });
 
   // Sash 拖拽
@@ -72,6 +79,19 @@ async function init() {
   // 菜单打开文件
   window.electronAPI.onOpenFile(async (filePath) => {
     await loadFile(filePath);
+  });
+
+  // 菜单保存文件
+  window.electronAPI.onSaveFile(async () => {
+    await saveCurrentFile();
+  });
+
+  // 窗口关闭前检查未保存修改
+  window.addEventListener('beforeunload', (e) => {
+    if (state.isDirty) {
+      e.preventDefault();
+      e.returnValue = '';
+    }
   });
 
   // 拖放

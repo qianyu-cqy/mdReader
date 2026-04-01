@@ -31,6 +31,7 @@ const dom = {
   get welcomeOpenBtn() { return document.getElementById('welcomeOpenBtn'); },
   get clearHistoryBtn() { return document.getElementById('clearHistoryBtn'); },
   get toggleThemeBtn() { return document.getElementById('toggleThemeBtn'); },
+  get modeToggleBtn() { return document.getElementById('modeToggleBtn'); },
 
   // History
   get historyList() { return document.getElementById('historyList'); },

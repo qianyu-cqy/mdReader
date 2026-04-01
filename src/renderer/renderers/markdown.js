@@ -4,6 +4,7 @@ import { getFileName } from '../utils.js';
 import { updateEditorTab } from '../tab.js';
 import { generateToc } from '../outline.js';
 import { updateStatusBar } from '../statusbar.js';
+import { initSourceMode } from '../source-mode.js';
 
 /**
  * 初始化 marked 配置
@@ -29,8 +30,9 @@ export function initMarked() {
  * 渲染 Markdown 文件
  * @param {string} markdown - Markdown 内容
  * @param {string} filePath - 文件路径
+ * @param {boolean} [skipSourceInit=false] - 是否跳过源码模式初始化（模式切换时使用）
  */
-export function renderMarkdown(markdown, filePath) {
+export function renderMarkdown(markdown, filePath, skipSourceInit = false) {
   state.currentPath = filePath;
   state.currentFileType = 'markdown';
 
@@ -58,6 +60,11 @@ export function renderMarkdown(markdown, filePath) {
 
   // 更新状态栏
   updateStatusBar(markdown, fileName);
+
+  // 初始化源码模式（保存原始内容，根据记忆决定是否自动切换）
+  if (!skipSourceInit) {
+    initSourceMode(markdown, filePath);
+  }
 }
 
 /**

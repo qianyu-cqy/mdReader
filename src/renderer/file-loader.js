@@ -4,6 +4,7 @@ import { renderMarkdown } from './renderers/markdown.js';
 import { renderPlainText } from './renderers/plaintext.js';
 import { loadPdfFile } from './renderers/pdf.js';
 import { refreshHistory } from './history.js';
+import { checkUnsavedChanges, resetSourceMode } from './source-mode.js';
 
 /**
  * 显示错误信息
@@ -33,7 +34,16 @@ export async function openFile() {
  * @param {string} filePath - 文件路径
  */
 export async function loadFile(filePath) {
+  // 检查未保存的修改
+  const canProceed = await checkUnsavedChanges();
+  if (!canProceed) return;
+
   const fileType = getFileType(filePath);
+
+  // PDF 文件需要重置编辑状态
+  if (fileType === 'pdf') {
+    resetSourceMode();
+  }
 
   if (fileType === 'pdf') {
     await loadPdfFile(filePath);

@@ -110,17 +110,37 @@ npm run build:all   # 所有平台
 
 ```
 md-reader/
-├── main.js              # Electron 主进程
-├── preload.js           # 预加载脚本（IPC 桥接）
-├── renderer.js          # 渲染进程逻辑
-├── index.html           # 主页面结构
-├── styles.css           # 全局样式
-├── assets/              # 应用图标资源
-│   ├── icon.icns       # macOS 图标
-│   └── icon.ico        # Windows 图标
-├── dist/                # 打包输出目录
-├── package.json         # 项目配置
-└── README.md           # 项目说明
+├── index.html                 # 主页面
+├── package.json
+├── assets/                    # 应用图标资源
+└── src/
+    ├── main/                  # 主进程（CommonJS）
+    │   ├── index.js           # 入口，应用生命周期
+    │   ├── window.js          # 窗口管理
+    │   ├── menu.js            # 菜单构建
+    │   ├── ipc.js             # IPC 通信
+    │   ├── history.js         # 历史记录持久化
+    │   └── file-utils.js      # 文件工具函数
+    ├── preload/
+    │   └── index.js           # contextBridge API
+    └── renderer/              # 渲染进程（ES Modules）
+        ├── index.js           # 入口，模块组装
+        ├── state.js           # 全局状态
+        ├── dom.js             # DOM 引用管理
+        ├── theme.js           # 主题切换
+        ├── sidebar.js         # 侧边栏
+        ├── outline.js         # 文档大纲
+        ├── tab.js             # 标签页
+        ├── file-loader.js     # 文件加载调度
+        ├── history.js         # 历史记录 UI
+        ├── keyboard.js        # 快捷键
+        ├── dragdrop.js        # 拖放
+        ├── renderers/         # 文件渲染器
+        │   ├── markdown.js
+        │   ├── plaintext.js
+        │   └── pdf.js
+        └── styles/            # 按组件拆分的样式
+            └── index.css      # 汇总入口
 ```
 
 ### 开发调试

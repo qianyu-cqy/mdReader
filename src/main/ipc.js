@@ -72,6 +72,16 @@ function registerIpcHandlers(mainWindow) {
     return null;
   });
 
+  // 写入文件
+  ipcMain.handle('write-file', async (event, filePath, content) => {
+    try {
+      fs.writeFileSync(filePath, content, 'utf-8');
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
+
   // 读取 PDF 文件二进制数据
   ipcMain.handle('read-file-binary', async (event, filePath) => {
     try {
