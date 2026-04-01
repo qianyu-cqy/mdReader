@@ -1,0 +1,220 @@
+/* ===== Primary Sidebar ===== */
+.primary-sidebar {
+  width: 260px;
+  min-width: 0;
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: width 0.15s ease, opacity 0.1s ease;
+}
+
+.primary-sidebar.collapsed {
+  width: 0;
+  border-right: none;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.sidebar-panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+.sidebar-panel.hidden {
+  display: none;
+}
+
+.sidebar-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  height: 35px;
+  min-height: 35px;
+  background: var(--sidebar-header-bg);
+  border-bottom: 1px solid var(--border);
+  text-transform: uppercase;
+}
+
+.sidebar-panel-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--sidebar-muted);
+  letter-spacing: 0.8px;
+}
+
+.sidebar-panel-actions {
+  display: flex;
+  gap: 2px;
+}
+
+.sidebar-panel-body {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Sidebar Section (collapsible tree) */
+.sidebar-section {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+.sidebar-section-header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--sidebar-fg);
+  text-transform: uppercase;
+  cursor: pointer;
+  user-select: none;
+  letter-spacing: 0.5px;
+}
+
+.sidebar-section-header:hover {
+  background: var(--bg-hover);
+}
+
+.sidebar-section-header .chevron {
+  transition: transform 0.15s ease;
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+}
+
+.sidebar-section-header.collapsed .chevron {
+  transform: rotate(-90deg);
+}
+
+.sidebar-section-body {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.sidebar-section-body.collapsed {
+  display: none;
+}
+
+/* History Items (tree-view style) */
+.history-item {
+  display: flex;
+  align-items: center;
+  padding: 4px 8px 4px 20px;
+  cursor: pointer;
+  transition: background 0.08s ease;
+  color: var(--sidebar-fg);
+  gap: 8px;
+  font-size: 13px;
+  position: relative;
+}
+
+.history-item:hover {
+  background: var(--sidebar-hover);
+}
+
+.history-item.active {
+  background: var(--sidebar-active);
+}
+
+.history-item .history-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.history-item-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.history-item-name {
+  font-size: 13px;
+  font-weight: 400;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.4;
+}
+
+.history-item-path {
+  font-size: 12px;
+  color: var(--sidebar-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Courier New', monospace;
+  line-height: 1.3;
+}
+
+.history-item-delete {
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--sidebar-muted);
+  cursor: pointer;
+  transition: var(--transition);
+  flex-shrink: 0;
+  opacity: 0;
+}
+
+.history-item:hover .history-item-delete {
+  opacity: 1;
+}
+
+.history-item-delete:hover {
+  background: rgba(243,139,168,0.15);
+  color: #f38ba8;
+}
+
+.empty-state-sm {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+  color: var(--sidebar-muted);
+}
+
+.empty-state-sm p {
+  font-size: 12px;
+}
+
+/* TOC in sidebar */
+.toc-list-sidebar {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 0;
+}
+
+/* ===== Scrollbar (sidebar) ===== */
+.sidebar-section-body::-webkit-scrollbar,
+.history-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar-section-body::-webkit-scrollbar-track,
+.history-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-section-body::-webkit-scrollbar-thumb,
+.history-list::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 2px;
+}

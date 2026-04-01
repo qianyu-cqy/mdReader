@@ -1,0 +1,41 @@
+/* ===== Status Bar ===== */
+.status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 22px;
+  min-height: 22px;
+  padding: 0 10px;
+  background: var(--status-bar-bg);
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--status-bar-fg);
+  z-index: 10;
+}
+
+.status-bar-left,
+.status-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.status-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 6px;
+  height: 22px;
+  cursor: default;
+  white-space: nowrap;
+  transition: background 0.08s ease;
+  border-radius: 0;
+}
+
+.status-item:hover {
+  background: rgba(255,255,255,0.06);
+}
+
+.status-item svg {
+  flex-shrink: 0;
+}

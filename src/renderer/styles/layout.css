@@ -1,0 +1,60 @@
+/* ===== App Container ===== */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ===== Workbench ===== */
+.workbench {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+/* ===== Action Buttons (small) ===== */
+.action-btn {
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--sidebar-muted);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.action-btn:hover {
+  background: var(--bg-hover);
+  color: var(--sidebar-fg);
+}
+
+/* ===== Sash (resize handle) ===== */
+.sash {
+  width: 4px;
+  cursor: col-resize;
+  background: var(--sash-color);
+  transition: background 0.15s ease;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 5;
+}
+
+.sash:hover,
+.sash.dragging {
+  background: var(--sash-hover);
+}
+
+.sash.hidden {
+  display: none;
+}
+
+/* ===== Resizing states ===== */
+.primary-sidebar.resizing,
+.outline-panel.resizing {
+  transition: none;
+}

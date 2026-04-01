@@ -2,7 +2,7 @@
   "name": "md-reader",
   "version": "1.0.0",
   "description": "A simple Markdown, TXT and PDF reader for Mac and Windows",
-  "main": "main.js",
+  "main": "src/main/index.js",
   "scripts": {
     "start": "electron .",
     "build": "electron-builder",

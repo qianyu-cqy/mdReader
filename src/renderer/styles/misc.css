@@ -1,0 +1,77 @@
+/* ===== Error State ===== */
+.error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: #f38ba8;
+  text-align: center;
+}
+
+.error h2 {
+  margin-bottom: 8px;
+}
+
+.error p {
+  color: var(--text-muted);
+}
+
+/* ===== Drag & Drop Overlay ===== */
+.drag-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(137,180,250,0.06);
+  border: 2px dashed var(--accent);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.drag-overlay.active {
+  display: flex;
+}
+
+.drag-overlay-content {
+  text-align: center;
+  color: var(--accent);
+}
+
+.drag-overlay-content svg {
+  width: 56px;
+  height: 56px;
+  margin-bottom: 12px;
+  opacity: 0.7;
+}
+
+.drag-overlay-content p {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .activity-bar {
+    width: 42px;
+    min-width: 42px;
+  }
+
+  .primary-sidebar:not(.collapsed) {
+    position: absolute;
+    left: 42px;
+    top: 38px;
+    bottom: 22px;
+    z-index: 100;
+    box-shadow: 4px 0 16px rgba(0,0,0,0.3);
+  }
+
+  .editor-content {
+    padding: 20px;
+  }
+
+  .welcome h1 {
+    font-size: 18px;
+  }
+}

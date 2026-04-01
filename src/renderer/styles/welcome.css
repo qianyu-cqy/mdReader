@@ -1,0 +1,85 @@
+/* ===== Welcome Screen ===== */
+.welcome {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.welcome h1 {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 28px;
+  letter-spacing: -0.3px;
+}
+
+.welcome-actions {
+  margin-bottom: 32px;
+}
+
+.welcome-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 20px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--welcome-btn-fg);
+  background: var(--welcome-btn-bg);
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: filter 0.15s ease;
+}
+
+.welcome-btn:hover {
+  filter: brightness(1.08);
+}
+
+.welcome-btn:active {
+  filter: brightness(0.95);
+}
+
+.welcome-shortcuts {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: 220px;
+  margin-bottom: 28px;
+}
+
+.welcome-shortcut-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.welcome-shortcut-row:last-child {
+  border-bottom: none;
+}
+
+.welcome-shortcut-label {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.welcome-shortcut-row kbd {
+  padding: 2px 6px;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+  font-size: 11px;
+  color: var(--text-secondary);
+  background: var(--code-block-bg);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+}
+
+.welcome-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+}

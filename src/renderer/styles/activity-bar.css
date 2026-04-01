@@ -1,0 +1,63 @@
+/* ===== Activity Bar ===== */
+.activity-bar {
+  width: 48px;
+  min-width: 48px;
+  background: var(--activity-bar-bg);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-right: 1px solid var(--border);
+  z-index: 10;
+}
+
+.activity-bar-top,
+.activity-bar-bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 0;
+}
+
+.activity-bar-item {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--activity-bar-fg);
+  cursor: pointer;
+  transition: color 0.1s ease;
+  position: relative;
+}
+
+.activity-bar-item:hover {
+  color: var(--activity-bar-active);
+}
+
+.activity-bar-item.active {
+  color: var(--activity-bar-active);
+}
+
+.activity-bar-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2px;
+  height: 24px;
+  background: var(--activity-bar-indicator);
+  border-radius: 0 2px 2px 0;
+}
+
+.activity-bar-item:focus {
+  outline: none;
+}
+
+.activity-bar-item:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: -2px;
+}

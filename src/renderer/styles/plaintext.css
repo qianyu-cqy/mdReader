@@ -1,0 +1,20 @@
+/* ===== Plain Text Styles ===== */
+.plaintext-body {
+  max-width: 860px;
+  margin: 0 auto;
+  animation: slideIn 0.25s ease-out;
+}
+
+.plaintext-pre {
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Courier New', 'Noto Sans SC', monospace;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  tab-size: 4;
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+}

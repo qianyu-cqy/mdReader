@@ -1,0 +1,26 @@
+/* ===== Title Bar ===== */
+.titlebar {
+  height: 38px;
+  min-height: 38px;
+  background: var(--titlebar-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  border-bottom: 1px solid var(--border);
+  -webkit-app-region: drag;
+  z-index: 100;
+}
+
+.titlebar-drag-region {
+  position: absolute;
+  inset: 0;
+}
+
+.titlebar-title {
+  font-size: 12px;
+  color: var(--titlebar-fg);
+  font-weight: 500;
+  pointer-events: none;
+  user-select: none;
+}
