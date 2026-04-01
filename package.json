@@ -6,10 +6,10 @@
   "scripts": {
     "sync-version": "node -e \"const v=require('./config.json').version;const p=require('./package.json');p.version=v;require('fs').writeFileSync('./package.json',JSON.stringify(p,null,2)+'\\n')\"",
     "start": "electron .",
-    "build": "npm run sync-version && electron-builder",
-    "build:mac": "npm run sync-version && electron-builder --mac",
-    "build:win": "npm run sync-version && electron-builder --win",
-    "build:all": "npm run sync-version && electron-builder --mac --win"
+    "build": "npm run sync-version && electron-builder --publish never",
+    "build:mac": "npm run sync-version && electron-builder --mac --publish never",
+    "build:win": "npm run sync-version && electron-builder --win --publish never",
+    "build:all": "npm run sync-version && electron-builder --mac --win --publish never"
   },
   "keywords": [
     "markdown",
