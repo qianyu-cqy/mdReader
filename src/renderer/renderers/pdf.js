@@ -3,7 +3,7 @@ import state from '../state.js';
 import { escapeHtml, getFileName } from '../utils.js';
 import { updateEditorTab } from '../tab.js';
 import { clearOutline } from '../outline.js';
-import { updateStatusBarForPdf } from '../statusbar.js';
+import { updateStatusBarForPdf, updatePdfCurrentPage } from '../statusbar.js';
 import { refreshHistory } from '../history.js';
 
 let pdfjsInitialized = false;
@@ -184,37 +184,48 @@ function highlightPdfTocItem(activeItem) {
  * 设置 PDF 滚动时自动高亮目录中对应的页码项
  */
 function setupPdfScrollHighlight() {
+  let ticking = false;
+
   dom.content.addEventListener('scroll', () => {
     if (state.currentFileType !== 'pdf') return;
+    if (ticking) return;
 
-    const pages = dom.content.querySelectorAll('.pdf-page');
-    if (pages.length === 0) return;
+    ticking = true;
+    requestAnimationFrame(() => {
+      ticking = false;
 
-    const scrollTop = dom.content.scrollTop;
-    const offset = 100;
+      const pages = dom.content.querySelectorAll('.pdf-page');
+      if (pages.length === 0) return;
 
-    let currentPage = 1;
-    pages.forEach(page => {
-      if (page.offsetTop - offset <= scrollTop) {
-        currentPage = parseInt(page.getAttribute('data-page'));
-      }
-    });
+      const scrollTop = dom.content.scrollTop;
+      const offset = 100;
 
-    // 找到当前页码对应的最后一个目录项来高亮
-    [dom.tocList, dom.tocListSidebar].forEach(list => {
-      const items = list.querySelectorAll('.toc-item');
-      let lastMatch = null;
-      items.forEach(item => {
-        item.classList.remove('active');
-        const itemPage = parseInt(item.getAttribute('data-page'));
-        if (itemPage <= currentPage) {
-          lastMatch = item;
+      let currentPage = 1;
+      pages.forEach(page => {
+        if (page.offsetTop - offset <= scrollTop) {
+          currentPage = parseInt(page.getAttribute('data-page'));
         }
       });
-      if (lastMatch) {
-        lastMatch.classList.add('active');
-        lastMatch.scrollIntoView({ block: 'nearest' });
-      }
+
+      // 更新状态栏当前页码
+      updatePdfCurrentPage(currentPage, pages.length);
+
+      // 找到当前页码对应的最后一个目录项来高亮
+      [dom.tocList, dom.tocListSidebar].forEach(list => {
+        const items = list.querySelectorAll('.toc-item');
+        let lastMatch = null;
+        items.forEach(item => {
+          item.classList.remove('active');
+          const itemPage = parseInt(item.getAttribute('data-page'));
+          if (itemPage <= currentPage) {
+            lastMatch = item;
+          }
+        });
+        if (lastMatch) {
+          lastMatch.classList.add('active');
+          lastMatch.scrollIntoView({ block: 'nearest' });
+        }
+      });
     });
   });
 }

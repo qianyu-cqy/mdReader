@@ -37,8 +37,17 @@ export function updateStatusBar(textContent, fileName) {
  */
 export function updateStatusBarForPdf(fileName, totalPages) {
   dom.statusFileInfo.innerHTML = `${FILE_ICON_SVG} ${escapeHtml(fileName)}`;
-  dom.statusWordCount.textContent = `共 ${totalPages} 页`;
+  dom.statusWordCount.textContent = `第 1/${totalPages} 页`;
   dom.statusType.textContent = 'PDF';
+}
+
+/**
+ * 更新 PDF 状态栏中的当前页码
+ * @param {number} currentPage - 当前页码 (1-based)
+ * @param {number} totalPages - 总页数
+ */
+export function updatePdfCurrentPage(currentPage, totalPages) {
+  dom.statusWordCount.textContent = `第 ${currentPage}/${totalPages} 页`;
 }
 
 /**

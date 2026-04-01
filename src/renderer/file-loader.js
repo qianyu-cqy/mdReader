@@ -105,6 +105,9 @@ async function renderFileContent(filePath, fileType, rawContent) {
  * @param {Object} tab - tab 数据对象
  */
 export async function reloadTab(tab) {
+  // 渲染期间禁用平滑滚动，避免内容变化触发滚动动画
+  dom.content.style.scrollBehavior = 'auto';
+
   await renderFileContent(tab.filePath, tab.fileType, tab.rawContent);
 
   // 恢复 tab 快照中的 isDirty 和 viewMode
@@ -117,4 +120,7 @@ export async function reloadTab(tab) {
     const { updateTabDirtyState } = await import('./tab.js');
     updateTabDirtyState();
   }
+
+  // 渲染完成后恢复平滑滚动（由 switchToTab 在设置 scrollTop 后最终恢复）
+  // 这里不恢复，留给 switchToTab 的 requestAnimationFrame 处理
 }

@@ -79,6 +79,12 @@ export function snapshotCurrentTab() {
   // 保存滚动位置
   tab.scrollTop = dom.content.scrollTop;
 
+  // 对 txt 文件，textarea 有自己的滚动条，需要额外保存
+  const editor = document.getElementById('sourceEditor');
+  if (editor && state.currentFileType === 'txt') {
+    tab.editorScrollTop = editor.scrollTop;
+  }
+
   // 同步 state → tab
   tab.rawContent = state.rawContent;
   tab.viewMode = state.viewMode;
@@ -86,7 +92,6 @@ export function snapshotCurrentTab() {
   tab.fileType = state.currentFileType;
 
   // 如果有编辑器，保存编辑器内容
-  const editor = document.getElementById('sourceEditor');
   if (editor) {
     tab.rawContent = editor.value;
     state.rawContent = editor.value;
@@ -168,9 +173,23 @@ export async function switchToTab(tabId) {
     await _reloadTab(targetTab);
   }
 
-  // 恢复滚动位置
+  // 恢复滚动位置（瞬间跳转，不使用平滑滚动）
   requestAnimationFrame(() => {
+    dom.content.style.scrollBehavior = 'auto';
     dom.content.scrollTop = targetTab.scrollTop;
+
+    // 对 txt 文件，还需要恢复 textarea 的滚动位置
+    if (targetTab.fileType === 'txt' && targetTab.editorScrollTop != null) {
+      const editor = document.getElementById('sourceEditor');
+      if (editor) {
+        editor.scrollTop = targetTab.editorScrollTop;
+      }
+    }
+
+    // 下一帧恢复平滑滚动（供目录跳转等场景使用）
+    requestAnimationFrame(() => {
+      dom.content.style.scrollBehavior = '';
+    });
   });
 
   // 更新历史列表高亮
