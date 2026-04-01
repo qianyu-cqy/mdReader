@@ -8,5 +8,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   removeHistory: (filePath) => ipcRenderer.invoke('remove-history', filePath),
   openFileDialog: () => ipcRenderer.invoke('open-file-dialog'),
   onOpenFile: (callback) => ipcRenderer.on('open-file', (event, path) => callback(path)),
-  getPathForFile: (file) => webUtils.getPathForFile(file)
+  getPathForFile: (file) => webUtils.getPathForFile(file),
+  platform: process.platform  // 'darwin', 'win32', 'linux'
 });

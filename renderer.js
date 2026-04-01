@@ -61,6 +61,15 @@ const welcomeTab = document.getElementById('welcomeTab');
 
 // ===== Initialize =====
 async function init() {
+  // 根据平台调整 UI
+  const isWindows = window.electronAPI.platform === 'win32';
+  if (isWindows) {
+    // Windows 有原生标题栏，隐藏自定义标题栏和面包屑栏
+    const titlebar = document.getElementById('titlebar');
+    if (titlebar) titlebar.style.display = 'none';
+    if (breadcrumbBar) breadcrumbBar.style.display = 'none';
+  }
+
   // File open
   openFileBtn.addEventListener('click', openFile);
   welcomeOpenBtn.addEventListener('click', openFile);
@@ -417,6 +426,11 @@ function renderHistory(history) {
 
 async function clearAllHistory() {
   const history = await window.electronAPI.getHistory();
+  if (!history || history.length === 0) return;
+
+  const confirmed = confirm('确定要清空所有浏览记录吗？此操作不可撤销。');
+  if (!confirmed) return;
+
   for (const item of history) {
     await window.electronAPI.removeHistory(item.path);
   }
