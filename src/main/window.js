@@ -32,6 +32,13 @@ function createWindow() {
     mainWindow.show();
   });
 
+  // 将 findInPage 的搜索结果转发给渲染进程
+  mainWindow.webContents.on('found-in-page', (event, result) => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('found-in-page-result', result);
+    }
+  });
+
   // 拦截窗口关闭事件，检查未保存修改
   mainWindow.on('close', (e) => {
     // 如果已经确认关闭，直接放行

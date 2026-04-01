@@ -62,6 +62,9 @@ export async function loadFile(filePath) {
   // 添加历史
   await window.electronAPI.addHistory(filePath);
   await refreshHistory();
+
+  // 开始监听文件外部修改
+  await window.electronAPI.watchFile(filePath);
 }
 
 /**

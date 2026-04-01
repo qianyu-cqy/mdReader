@@ -17,5 +17,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
   confirmClose: () => ipcRenderer.send('close-confirmed'),
   getPathForFile: (file) => webUtils.getPathForFile(file),
   showUnsavedDialog: (fileName) => ipcRenderer.invoke('show-unsaved-dialog', fileName),
+  findInPage: (text, options) => ipcRenderer.invoke('find-in-page', text, options),
+  stopFindInPage: () => ipcRenderer.invoke('stop-find-in-page'),
+  onFoundInPage: (callback) => ipcRenderer.on('found-in-page-result', (event, result) => callback(result)),
+  watchFile: (filePath) => ipcRenderer.invoke('watch-file', filePath),
+  unwatchFile: (filePath) => ipcRenderer.invoke('unwatch-file', filePath),
+  onFileChangedExternally: (callback) => ipcRenderer.on('file-changed-externally', (event, filePath) => callback(filePath)),
   platform: process.platform  // 'darwin', 'win32', 'linux'
 });

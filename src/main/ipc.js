@@ -3,6 +3,9 @@ const path = require('path');
 const fs = require('fs');
 const { readHistory, writeHistory } = require('./history');
 
+// 文件监听器集合：filePath -> { watcher, mtime }
+const fileWatchers = new Map();
+
 /**
  * 注册所有 IPC handlers
  * @param {BrowserWindow} mainWindow - 主窗口引用（用于 dialog 的 parent）
@@ -110,6 +113,59 @@ function registerIpcHandlers(mainWindow) {
     });
     // result.response: 0=保存, 1=放弃, 2=取消
     return result.response;
+  });
+
+  // 页内搜索
+  ipcMain.handle('find-in-page', (event, text, options) => {
+    if (!text) return null;
+    const requestId = mainWindow.webContents.findInPage(text, options || {});
+    return requestId;
+  });
+
+  // 停止页内搜索
+  ipcMain.handle('stop-find-in-page', () => {
+    mainWindow.webContents.stopFindInPage('clearSelection');
+  });
+
+  // 监听文件外部修改
+  ipcMain.handle('watch-file', (event, filePath) => {
+    // 如果已经在监听，先停止
+    if (fileWatchers.has(filePath)) return;
+
+    try {
+      const stat = fs.statSync(filePath);
+      let lastMtime = stat.mtimeMs;
+
+      const watcher = fs.watch(filePath, { persistent: false }, (eventType) => {
+        if (eventType === 'change') {
+          try {
+            const newStat = fs.statSync(filePath);
+            // 仅当修改时间确实变化时才通知（避免重复触发）
+            if (newStat.mtimeMs !== lastMtime) {
+              lastMtime = newStat.mtimeMs;
+              if (mainWindow && !mainWindow.isDestroyed()) {
+                mainWindow.webContents.send('file-changed-externally', filePath);
+              }
+            }
+          } catch {
+            // 文件可能已被删除
+          }
+        }
+      });
+
+      fileWatchers.set(filePath, watcher);
+    } catch {
+      // 文件不存在等情况忽略
+    }
+  });
+
+  // 停止监听文件
+  ipcMain.handle('unwatch-file', (event, filePath) => {
+    const watcher = fileWatchers.get(filePath);
+    if (watcher) {
+      watcher.close();
+      fileWatchers.delete(filePath);
+    }
   });
 }
 

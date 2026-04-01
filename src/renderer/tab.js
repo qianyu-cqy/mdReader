@@ -136,6 +136,12 @@ export async function closeTab(tabId, force = false) {
   // 移除 tab
   state.tabs.splice(tabIndex, 1);
 
+  // 停止监听该文件的外部修改（如果没有其他标签页还在用它）
+  const stillOpen = state.tabs.some(t => t.filePath === tab.filePath);
+  if (!stillOpen) {
+    window.electronAPI.unwatchFile(tab.filePath);
+  }
+
   if (state.tabs.length === 0) {
     // 没有标签页了，显示欢迎页
     state.activeTabId = null;
@@ -305,6 +311,12 @@ function renderTabBar() {
       }
     });
 
+    // 右键菜单
+    el.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      showTabContextMenu(e.clientX, e.clientY, tab.id);
+    });
+
     el.appendChild(iconSpan);
     el.appendChild(labelSpan);
     el.appendChild(closeBtn);
@@ -369,6 +381,10 @@ function showWelcome() {
   dom.titlebarTitle.textContent = 'MD Reader';
   dom.currentPathDisplay.textContent = 'MD Reader';
 
+  const isMac = window.electronAPI.platform === 'darwin';
+  const mod = isMac ? '⌘' : 'Ctrl+';
+  const shift = isMac ? '⇧ ' : 'Shift+';
+
   dom.content.innerHTML = `
     <div class="welcome">
       <h1>MD Reader</h1>
@@ -384,19 +400,19 @@ function showWelcome() {
       <div class="welcome-shortcuts">
         <div class="welcome-shortcut-row">
           <span class="welcome-shortcut-label">打开文件</span>
-          <kbd>⌘ O</kbd>
+          <kbd>${mod}O</kbd>
         </div>
         <div class="welcome-shortcut-row">
           <span class="welcome-shortcut-label">保存文件</span>
-          <kbd>⌘ S</kbd>
+          <kbd>${mod}S</kbd>
         </div>
         <div class="welcome-shortcut-row">
           <span class="welcome-shortcut-label">切换侧栏</span>
-          <kbd>⌘ B</kbd>
+          <kbd>${mod}B</kbd>
         </div>
         <div class="welcome-shortcut-row">
           <span class="welcome-shortcut-label">资源管理器</span>
-          <kbd>⌘ ⇧ E</kbd>
+          <kbd>${mod}${shift}E</kbd>
         </div>
       </div>
       <p class="welcome-hint">拖拽 .md / .txt / .pdf 文件到窗口即可打开</p>
@@ -415,6 +431,146 @@ function showWelcome() {
   resetStatusBar();
   renderTabBar();
   updateHistoryHighlight();
+}
+
+/**
+ * 关闭其他标签页（保留指定的标签页）
+ * @param {string} keepTabId - 要保留的标签页 ID
+ */
+async function closeOtherTabs(keepTabId) {
+  // 先同步当前标签状态
+  snapshotCurrentTab();
+
+  // 只对有未保存修改的标签逐个确认
+  const tabsToClose = state.tabs.filter(t => t.id !== keepTabId);
+  for (const tab of tabsToClose) {
+    if (tab.isDirty) {
+      const fileName = getFileName(tab.filePath);
+      const response = await window.electronAPI.showUnsavedDialog(fileName);
+      if (response === 0) {
+        // 保存
+        if (tab.fileType === 'markdown' || tab.fileType === 'txt') {
+          const result = await window.electronAPI.writeFile(tab.filePath, tab.rawContent);
+          if (!result.success) return; // 保存失败，中止
+        }
+      } else if (response === 2) {
+        return; // 取消，中止
+      }
+      // 放弃修改，继续
+    }
+    // 停止文件监听
+    const stillNeeded = tab.filePath === state.tabs.find(t => t.id === keepTabId)?.filePath;
+    if (!stillNeeded) {
+      window.electronAPI.unwatchFile(tab.filePath);
+    }
+  }
+
+  // 批量移除，只保留指定标签
+  state.tabs = state.tabs.filter(t => t.id === keepTabId);
+
+  // 如果保留的不是当前激活的，切换过去
+  if (state.activeTabId !== keepTabId) {
+    await switchToTab(keepTabId);
+  } else {
+    renderTabBar();
+  }
+}
+
+/**
+ * 关闭所有标签页
+ */
+async function closeAllTabs() {
+  // 先同步当前标签状态
+  snapshotCurrentTab();
+
+  // 只对有未保存修改的标签逐个确认
+  for (const tab of [...state.tabs]) {
+    if (tab.isDirty) {
+      const fileName = getFileName(tab.filePath);
+      const response = await window.electronAPI.showUnsavedDialog(fileName);
+      if (response === 0) {
+        // 保存
+        if (tab.fileType === 'markdown' || tab.fileType === 'txt') {
+          const result = await window.electronAPI.writeFile(tab.filePath, tab.rawContent);
+          if (!result.success) return; // 保存失败，中止
+        }
+      } else if (response === 2) {
+        return; // 取消，中止
+      }
+    }
+    // 停止文件监听
+    window.electronAPI.unwatchFile(tab.filePath);
+  }
+
+  // 批量清空所有标签
+  state.tabs = [];
+  state.activeTabId = null;
+  showWelcome();
+}
+
+/**
+ * 显示标签页右键菜单
+ * @param {number} x - 鼠标 x 坐标
+ * @param {number} y - 鼠标 y 坐标
+ * @param {string} tabId - 右键点击的标签页 ID
+ */
+function showTabContextMenu(x, y, tabId) {
+  // 移除已有的右键菜单
+  removeTabContextMenu();
+
+  const menu = document.createElement('div');
+  menu.className = 'tab-context-menu';
+  menu.style.left = x + 'px';
+  menu.style.top = y + 'px';
+
+  const items = [
+    { label: '关闭', action: () => closeTab(tabId) },
+    { label: '关闭其他标签页', action: () => closeOtherTabs(tabId), disabled: state.tabs.length <= 1 },
+    { label: '关闭所有标签页', action: () => closeAllTabs() },
+  ];
+
+  items.forEach(item => {
+    const el = document.createElement('div');
+    el.className = 'tab-context-menu-item';
+    if (item.disabled) el.classList.add('disabled');
+    el.textContent = item.label;
+    if (!item.disabled) {
+      el.addEventListener('click', () => {
+        removeTabContextMenu();
+        item.action();
+      });
+    }
+    menu.appendChild(el);
+  });
+
+  document.body.appendChild(menu);
+
+  // 确保菜单不超出视窗
+  requestAnimationFrame(() => {
+    const rect = menu.getBoundingClientRect();
+    if (rect.right > window.innerWidth) {
+      menu.style.left = (window.innerWidth - rect.width - 4) + 'px';
+    }
+    if (rect.bottom > window.innerHeight) {
+      menu.style.top = (window.innerHeight - rect.height - 4) + 'px';
+    }
+  });
+
+  // 点击其他位置关闭菜单
+  const closeHandler = (e) => {
+    if (!menu.contains(e.target)) {
+      removeTabContextMenu();
+    }
+  };
+  setTimeout(() => document.addEventListener('click', closeHandler, { once: true }), 0);
+}
+
+/**
+ * 移除右键菜单
+ */
+function removeTabContextMenu() {
+  const existing = document.querySelector('.tab-context-menu');
+  if (existing) existing.remove();
 }
 
 /**

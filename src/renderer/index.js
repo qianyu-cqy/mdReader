@@ -11,6 +11,7 @@ import { setupKeyboard } from './keyboard.js';
 import { setupDragDrop } from './dragdrop.js';
 import { initMarked } from './renderers/markdown.js';
 import { toggleMode, saveCurrentFile, setDirtyCallback } from './source-mode.js';
+import { updateSearchResult } from './search.js';
 
 // ===== 初始化 =====
 async function init() {
@@ -114,6 +115,52 @@ async function init() {
     await closeCurrentTab();
   });
 
+  // 文件外部修改检测
+  window.electronAPI.onFileChangedExternally(async (filePath) => {
+    // 查找对应的标签页
+    const tab = state.tabs.find(t => t.filePath === filePath);
+    if (!tab) return;
+
+    // 如果该标签有未保存修改，提示用户
+    if (tab.isDirty) {
+      const fileName = filePath.split('/').pop() || filePath.split('\\').pop();
+      const response = await window.electronAPI.showUnsavedDialog(fileName + ' (已被外部修改)');
+      if (response === 0) {
+        // 保存：用当前编辑内容覆盖文件
+        await window.electronAPI.writeFile(filePath, tab.rawContent);
+        return;
+      } else if (response === 2) {
+        // 取消：保持当前状态
+        return;
+      }
+      // 放弃：重新加载文件
+    }
+
+    // 重新读取文件内容
+    if (tab.fileType === 'pdf') {
+      // PDF 文件需要重新渲染（如果是当前标签）
+      if (tab.id === state.activeTabId) {
+        const { reloadTab: _reload } = await import('./file-loader.js');
+        tab.rawContent = '';
+        await _reload(tab);
+      }
+    } else {
+      const result = await window.electronAPI.readFile(filePath);
+      if (result.success) {
+        tab.rawContent = result.content;
+        tab.isDirty = false;
+        // 如果是当前激活的标签，重新渲染
+        if (tab.id === state.activeTabId) {
+          state.rawContent = result.content;
+          state.isDirty = false;
+          const { reloadTab: _reload } = await import('./file-loader.js');
+          await _reload(tab);
+          updateTabDirtyState();
+        }
+      }
+    }
+  });
+
   // 窗口关闭前检查未保存修改（通过主进程 IPC）
   window.electronAPI.onBeforeClose(async () => {
     // 先同步当前标签状态
@@ -158,6 +205,13 @@ async function init() {
 
   // 键盘快捷键
   setupKeyboard();
+
+  // 注册搜索结果回调
+  window.electronAPI.onFoundInPage((result) => {
+    if (result.finalUpdate) {
+      updateSearchResult(result.activeMatchOrdinal, result.matches);
+    }
+  });
 
   // 加载历史
   await refreshHistory();

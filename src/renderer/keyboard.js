@@ -2,6 +2,7 @@ import dom from './dom.js';
 import state from './state.js';
 import { togglePanel, showPanel, setActivityActive } from './sidebar.js';
 import { saveCurrentFile } from './source-mode.js';
+import { toggleSearch, isSearchVisible, hideSearch } from './search.js';
 
 /**
  * 注册键盘快捷键
@@ -33,6 +34,21 @@ export function setupKeyboard() {
     if (isMod && e.shiftKey && e.key === 'E') {
       e.preventDefault();
       togglePanel('explorer');
+    }
+
+    // Cmd/Ctrl + F → 页内搜索
+    if (isMod && e.key === 'f') {
+      e.preventDefault();
+      toggleSearch();
+    }
+
+    // Esc → 关闭搜索栏（仅在搜索输入框不在焦点时）
+    if (e.key === 'Escape' && isSearchVisible()) {
+      // 搜索输入框内的 Esc 已在 search.js 中处理
+      const active = document.activeElement;
+      if (!active || !active.classList.contains('search-input')) {
+        hideSearch();
+      }
     }
   });
 }
