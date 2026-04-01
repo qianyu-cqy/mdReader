@@ -17,6 +17,7 @@ if (typeof marked !== 'undefined') {
 // State
 let currentPath = '';
 let activePanel = 'explorer'; // 'explorer' | 'outline' | null
+let currentFileType = ''; // 'markdown' | 'txt' | 'pdf'
 
 // DOM Elements
 const titlebarTitle = document.getElementById('titlebarTitle');
@@ -55,6 +56,7 @@ const closeOutlineBtn = document.getElementById('closeOutlineBtn');
 const statusFileInfo = document.getElementById('statusFileInfo');
 const statusWordCount = document.getElementById('statusWordCount');
 const statusEncoding = document.getElementById('statusEncoding');
+const statusType = document.getElementById('statusType');
 
 // Tab elements
 const welcomeTab = document.getElementById('welcomeTab');
@@ -331,6 +333,14 @@ function onContentScroll() {
   });
 }
 
+// ===== File Type Detection =====
+function getFileType(filePath) {
+  const ext = filePath.toLowerCase().split('.').pop();
+  if (ext === 'pdf') return 'pdf';
+  if (ext === 'txt') return 'txt';
+  return 'markdown'; // md, markdown, 其他默认 markdown
+}
+
 // ===== File Operations =====
 async function openFile() {
   const filePath = await window.electronAPI.openFileDialog();
@@ -340,25 +350,28 @@ async function openFile() {
 }
 
 async function loadFile(filePath) {
-  const result = await window.electronAPI.readFile(filePath);
-  if (result.success) {
-    renderMarkdown(result.content, result.path);
-    await window.electronAPI.addHistory(result.path);
-    await refreshHistory();
+  const fileType = getFileType(filePath);
+
+  if (fileType === 'pdf') {
+    await loadPdfFile(filePath);
   } else {
-    showError(result.error);
+    const result = await window.electronAPI.readFile(filePath);
+    if (result.success) {
+      if (fileType === 'txt') {
+        renderPlainText(result.content, result.path);
+      } else {
+        renderMarkdown(result.content, result.path);
+      }
+      await window.electronAPI.addHistory(result.path);
+      await refreshHistory();
+    } else {
+      showError(result.error);
+    }
   }
 }
 
 async function loadFileWithoutHistory(filePath) {
-  const result = await window.electronAPI.readFile(filePath);
-  if (result.success) {
-    renderMarkdown(result.content, result.path);
-    await window.electronAPI.addHistory(result.path);
-    await refreshHistory();
-  } else {
-    showError(result.error);
-  }
+  await loadFile(filePath);
 }
 
 // ===== History =====
@@ -384,8 +397,14 @@ function renderHistory(history) {
 
     const dirPath = item.path.substring(0, item.path.lastIndexOf('/')) || item.path.substring(0, item.path.lastIndexOf('\\'));
 
+    // 根据文件类型选择图标
+    const fileExt = item.name.toLowerCase().split('.').pop();
+    let fileIcon = '📄';
+    if (fileExt === 'pdf') fileIcon = '📕';
+    else if (fileExt === 'txt') fileIcon = '📝';
+
     el.innerHTML = `
-      <span class="history-icon">📄</span>
+      <span class="history-icon">${fileIcon}</span>
       <div class="history-item-info">
         <span class="history-item-name">${escapeHtml(item.name)}</span>
         <span class="history-item-path">${escapeHtml(dirPath)}</span>
@@ -440,6 +459,7 @@ async function clearAllHistory() {
 // ===== Render Markdown =====
 function renderMarkdown(markdown, filePath) {
   currentPath = filePath;
+  currentFileType = 'markdown';
 
   // Update breadcrumb
   currentPathDisplay.textContent = filePath;
@@ -524,8 +544,8 @@ function renderMarkdown(markdown, filePath) {
   updateStatusBar(markdown, fileName);
 }
 
-function updateEditorTab(fileName) {
-  welcomeTab.querySelector('.editor-tab-icon').textContent = '📄';
+function updateEditorTab(fileName, icon) {
+  welcomeTab.querySelector('.editor-tab-icon').textContent = icon || '📄';
   welcomeTab.querySelector('.editor-tab-label').textContent = fileName;
   welcomeTab.title = fileName;
 }
@@ -533,6 +553,7 @@ function updateEditorTab(fileName) {
 function closeCurrentTab() {
   // Reset state
   currentPath = '';
+  currentFileType = '';
 
   // Restore tab to Welcome
   welcomeTab.querySelector('.editor-tab-icon').textContent = '📖';
@@ -572,7 +593,7 @@ function closeCurrentTab() {
           <kbd>⌘ ⇧ E</kbd>
         </div>
       </div>
-      <p class="welcome-hint">拖拽 .md 文件到窗口即可打开</p>
+      <p class="welcome-hint">拖拽 .md / .txt / .pdf 文件到窗口即可打开</p>
     </div>
   `;
 
@@ -600,16 +621,17 @@ function closeCurrentTab() {
     就绪
   `;
   statusWordCount.textContent = '字数: --';
+  statusType.textContent = '--';
 
   // Deactivate history items
   document.querySelectorAll('.history-item').forEach(i => i.classList.remove('active'));
 }
 
-function updateStatusBar(markdown, fileName) {
+function updateStatusBar(textContent, fileName) {
   // Word count (approximate)
-  const text = markdown.replace(/[#*`\[\]()>_~|\\-]/g, ' ');
+  const text = textContent.replace(/[#*`\[\]()>_~|\\-]/g, ' ');
   const words = text.trim().split(/\s+/).filter(w => w.length > 0).length;
-  const chars = markdown.length;
+  const chars = textContent.length;
 
   statusFileInfo.innerHTML = `
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -619,6 +641,149 @@ function updateStatusBar(markdown, fileName) {
     ${escapeHtml(fileName)}
   `;
   statusWordCount.textContent = `字数: ${chars} | 词数: ${words}`;
+
+  // 更新文件类型标签
+  const typeLabels = { markdown: 'Markdown', txt: '纯文本', pdf: 'PDF' };
+  statusType.textContent = typeLabels[currentFileType] || '--';
+}
+
+// ===== Render Plain Text =====
+function renderPlainText(text, filePath) {
+  currentPath = filePath;
+  currentFileType = 'txt';
+
+  // Update breadcrumb
+  currentPathDisplay.textContent = filePath;
+
+  // Update titlebar
+  const fileName = filePath.split('/').pop() || filePath.split('\\').pop();
+  titlebarTitle.textContent = fileName + ' — MD Reader';
+
+  // Update tab
+  updateEditorTab(fileName, '📝');
+
+  // 将纯文本转为 HTML（保留空格和换行）
+  const escapedText = escapeHtml(text);
+  content.innerHTML = `<div class="plaintext-body"><pre class="plaintext-pre">${escapedText}</pre></div>`;
+
+  // 清空大纲（纯文本没有标题层级）
+  const emptyMsg = '<div class="empty-state-sm"><p>纯文本文件无大纲</p></div>';
+  tocList.innerHTML = emptyMsg;
+  tocListSidebar.innerHTML = emptyMsg;
+
+  // Update status bar
+  updateStatusBar(text, fileName);
+}
+
+// ===== Render PDF =====
+let pdfjsInitialized = false;
+
+function getPdfjsLib() {
+  const pdfjsLib = window['pdfjs-dist/build/pdf'];
+  if (!pdfjsLib) throw new Error('PDF.js 库未加载');
+  if (!pdfjsInitialized) {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'node_modules/pdfjs-dist/build/pdf.worker.min.js';
+    pdfjsInitialized = true;
+  }
+  return pdfjsLib;
+}
+
+async function loadPdfFile(filePath) {
+  currentPath = filePath;
+  currentFileType = 'pdf';
+
+  const fileName = filePath.split('/').pop() || filePath.split('\\').pop();
+
+  // Update UI
+  currentPathDisplay.textContent = filePath;
+  titlebarTitle.textContent = fileName + ' — MD Reader';
+  updateEditorTab(fileName, '📕');
+
+  // 显示加载状态
+  content.innerHTML = `<div class="pdf-loading"><p>正在加载 PDF…</p></div>`;
+
+  try {
+    // 获取 PDF.js
+    const pdfjsLib = getPdfjsLib();
+
+    // 读取二进制数据
+    const result = await window.electronAPI.readFileBinary(filePath);
+    if (!result.success) {
+      showError(result.error);
+      return;
+    }
+
+    const uint8Array = new Uint8Array(result.data);
+    const pdf = await pdfjsLib.getDocument({ data: uint8Array }).promise;
+    const totalPages = pdf.numPages;
+
+    // 创建 PDF 容器
+    content.innerHTML = `<div class="pdf-body" id="pdfContainer"></div>`;
+    const pdfContainer = document.getElementById('pdfContainer');
+
+    // 逐页渲染
+    for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
+      const page = await pdf.getPage(pageNum);
+
+      // 计算缩放比例，让 PDF 页面适应容器宽度
+      const containerWidth = content.clientWidth - 96; // 减去 padding
+      const viewport = page.getViewport({ scale: 1 });
+      const scale = Math.min(containerWidth / viewport.width, 2.5); // 最大 2.5 倍
+      const scaledViewport = page.getViewport({ scale });
+
+      // 创建页面包装器
+      const pageWrapper = document.createElement('div');
+      pageWrapper.className = 'pdf-page';
+      pageWrapper.setAttribute('data-page', pageNum);
+
+      // 创建 canvas
+      const canvas = document.createElement('canvas');
+      canvas.width = scaledViewport.width * (window.devicePixelRatio || 1);
+      canvas.height = scaledViewport.height * (window.devicePixelRatio || 1);
+      canvas.style.width = scaledViewport.width + 'px';
+      canvas.style.height = scaledViewport.height + 'px';
+
+      const ctx = canvas.getContext('2d');
+      ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+
+      await page.render({
+        canvasContext: ctx,
+        viewport: scaledViewport
+      }).promise;
+
+      // 页码标签
+      const pageLabel = document.createElement('div');
+      pageLabel.className = 'pdf-page-label';
+      pageLabel.textContent = `第 ${pageNum} / ${totalPages} 页`;
+
+      pageWrapper.appendChild(canvas);
+      pageWrapper.appendChild(pageLabel);
+      pdfContainer.appendChild(pageWrapper);
+    }
+
+    // 清空大纲（PDF 暂不提取目录）
+    const emptyMsg = '<div class="empty-state-sm"><p>PDF 文件暂不支持大纲</p></div>';
+    tocList.innerHTML = emptyMsg;
+    tocListSidebar.innerHTML = emptyMsg;
+
+    // 更新状态栏
+    statusFileInfo.innerHTML = `
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+        <polyline points="14 2 14 8 20 8"></polyline>
+      </svg>
+      ${escapeHtml(fileName)}
+    `;
+    statusWordCount.textContent = `共 ${totalPages} 页`;
+    statusType.textContent = 'PDF';
+
+    // 添加历史
+    await window.electronAPI.addHistory(filePath);
+    await refreshHistory();
+
+  } catch (error) {
+    showError('PDF 加载失败: ' + error.message);
+  }
 }
 
 // ===== Keyboard Shortcuts =====

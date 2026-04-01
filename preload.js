@@ -2,6 +2,7 @@ const { contextBridge, ipcRenderer, webUtils } = require('electron');
 
 contextBridge.exposeInMainWorld('electronAPI', {
   readFile: (filePath) => ipcRenderer.invoke('read-file', filePath),
+  readFileBinary: (filePath) => ipcRenderer.invoke('read-file-binary', filePath),
   fileExists: (filePath) => ipcRenderer.invoke('file-exists', filePath),
   getHistory: () => ipcRenderer.invoke('get-history'),
   addHistory: (filePath) => ipcRenderer.invoke('add-history', filePath),

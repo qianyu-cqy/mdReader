@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net;">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net; worker-src 'self' blob:;">
   <title>MD Reader</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="node_modules/highlight.js/styles/github.min.css" id="hljs-light" disabled>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/index.js"></script>
+  <script src="node_modules/pdfjs-dist/build/pdf.min.js"></script>
 </head>
 <body>
   <div class="app-container">
@@ -165,7 +166,7 @@
               </div>
             </div>
 
-            <p class="welcome-hint">拖拽 .md 文件到窗口即可打开</p>
+            <p class="welcome-hint">拖拽 .md / .txt / .pdf 文件到窗口即可打开</p>
           </div>
         </div>
       </div>
@@ -206,7 +207,7 @@
       <div class="status-bar-right">
         <span class="status-item" id="statusWordCount">字数: --</span>
         <span class="status-item" id="statusEncoding">UTF-8</span>
-        <span class="status-item" id="statusType">Markdown</span>
+        <span class="status-item" id="statusType">--</span>
       </div>
     </div>
   </div>

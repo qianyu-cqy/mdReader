@@ -1,7 +1,7 @@
 {
   "name": "md-reader",
   "version": "1.0.0",
-  "description": "A simple Markdown reader for Mac and Windows",
+  "description": "A simple Markdown, TXT and PDF reader for Mac and Windows",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
@@ -10,7 +10,11 @@
     "build:win": "electron-builder --win",
     "build:all": "electron-builder --mac --win"
   },
-  "keywords": ["markdown", "reader", "electron"],
+  "keywords": [
+    "markdown",
+    "reader",
+    "electron"
+  ],
   "author": "",
   "license": "MIT",
   "devDependencies": {
@@ -18,9 +22,10 @@
     "electron-builder": "^25.1.8"
   },
   "dependencies": {
-    "marked": "^12.0.0",
     "highlight.js": "^11.9.0",
-    "highlightjs-line-numbers.js": "^2.8.0"
+    "highlightjs-line-numbers.js": "^2.8.0",
+    "marked": "^12.0.0",
+    "pdfjs-dist": "^3.11.174"
   },
   "build": {
     "appId": "com.mdreader.app",
@@ -42,17 +47,37 @@
         "description": "Markdown Document",
         "mimeType": "text/markdown",
         "role": "Viewer"
+      },
+      {
+        "ext": "txt",
+        "name": "Text File",
+        "description": "Plain Text Document",
+        "mimeType": "text/plain",
+        "role": "Viewer"
+      },
+      {
+        "ext": "pdf",
+        "name": "PDF File",
+        "description": "PDF Document",
+        "mimeType": "application/pdf",
+        "role": "Viewer"
       }
     ],
     "mac": {
       "category": "public.app-category.productivity",
       "icon": "assets/icon.icns",
       "identity": null,
-      "target": ["dmg", "zip"]
+      "target": [
+        "dmg",
+        "zip"
+      ]
     },
     "win": {
       "icon": "assets/icon.ico",
-      "target": ["nsis", "portable"]
+      "target": [
+        "nsis",
+        "portable"
+      ]
     },
     "nsis": {
       "oneClick": false,

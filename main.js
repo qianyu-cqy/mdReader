@@ -25,12 +25,14 @@ app.on('open-file', (event, filePath) => {
   }
 });
 
-// 从命令行参数中提取 .md/.markdown 文件路径
+// 从命令行参数中提取支持的文件路径
+const SUPPORTED_EXTENSIONS = ['.md', '.markdown', '.txt', '.pdf'];
+
 function getFileFromArgs(args) {
   for (const arg of args) {
     if (arg && !arg.startsWith('-') && !arg.startsWith('--')) {
       const lower = arg.toLowerCase();
-      if (lower.endsWith('.md') || lower.endsWith('.markdown')) {
+      if (SUPPORTED_EXTENSIONS.some(ext => lower.endsWith(ext))) {
         return arg;
       }
     }
@@ -109,7 +111,12 @@ function createMenu() {
           click: async () => {
             const result = await dialog.showOpenDialog(mainWindow, {
               properties: ['openFile'],
-              filters: [{ name: 'Markdown', extensions: ['md', 'markdown', 'txt'] }]
+              filters: [
+                { name: '所有支持的文件', extensions: ['md', 'markdown', 'txt', 'pdf'] },
+                { name: 'Markdown', extensions: ['md', 'markdown'] },
+                { name: '文本文件', extensions: ['txt'] },
+                { name: 'PDF 文件', extensions: ['pdf'] }
+              ]
             });
             if (!result.canceled && result.filePaths.length > 0) {
               mainWindow.webContents.send('open-file', result.filePaths[0]);
@@ -280,10 +287,25 @@ ipcMain.handle('remove-history', async (event, filePath) => {
 ipcMain.handle('open-file-dialog', async () => {
   const result = await dialog.showOpenDialog(mainWindow, {
     properties: ['openFile'],
-    filters: [{ name: 'Markdown', extensions: ['md', 'markdown', 'txt'] }]
+    filters: [
+      { name: '所有支持的文件', extensions: ['md', 'markdown', 'txt', 'pdf'] },
+      { name: 'Markdown', extensions: ['md', 'markdown'] },
+      { name: '文本文件', extensions: ['txt'] },
+      { name: 'PDF 文件', extensions: ['pdf'] }
+    ]
   });
   if (!result.canceled && result.filePaths.length > 0) {
     return result.filePaths[0];
   }
   return null;
+});
+
+// 读取 PDF 文件二进制数据
+ipcMain.handle('read-file-binary', async (event, filePath) => {
+  try {
+    const buffer = fs.readFileSync(filePath);
+    return { success: true, data: buffer.buffer, path: filePath };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
 });
