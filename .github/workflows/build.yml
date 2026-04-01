@@ -35,6 +35,12 @@ jobs:
           node-version: 20
           cache: 'npm'
 
+      # 安装 Python 3.11（node-gyp 编译原生模块需要，Python 3.12+ 移除了 distutils）
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
       # 安装依赖
       - name: Install dependencies
         run: npm ci
