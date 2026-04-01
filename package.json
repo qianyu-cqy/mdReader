@@ -83,6 +83,13 @@
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true
-    }
+    },
+    "npmRebuild": true,
+    "nodeGypRebuild": false,
+    "buildDependenciesFromSource": false,
+    "files": [
+      "**/*",
+      "!node_modules/canvas/**"
+    ]
   }
 }

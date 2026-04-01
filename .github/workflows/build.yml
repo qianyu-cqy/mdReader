@@ -41,9 +41,9 @@ jobs:
         with:
           python-version: '3.11'
 
-      # 安装依赖
+      # 安装依赖（--ignore-optional 跳过 canvas 等可选原生模块）
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --ignore-optional
 
       # 打包
       - name: Build
