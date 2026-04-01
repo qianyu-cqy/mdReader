@@ -25,9 +25,26 @@ async function init() {
 
   // 根据平台调整 UI
   const isWindows = window.electronAPI.platform === 'win32';
+  const isMac = window.electronAPI.platform === 'darwin';
   if (isWindows) {
     if (dom.titlebar) dom.titlebar.style.display = 'none';
     if (dom.breadcrumbBar) dom.breadcrumbBar.style.display = 'none';
+  }
+
+  // 根据平台生成 Welcome 页快捷键提示
+  const mod = isMac ? '⌘' : 'Ctrl+';
+  const shift = isMac ? '⇧ ' : 'Shift+';
+  const shortcuts = [
+    { label: '打开文件', key: `${mod}O` },
+    { label: '保存文件', key: `${mod}S` },
+    { label: '切换侧栏', key: `${mod}B` },
+    { label: '资源管理器', key: `${mod}${shift}E` },
+  ];
+  const welcomeShortcuts = document.getElementById('welcomeShortcuts');
+  if (welcomeShortcuts) {
+    welcomeShortcuts.innerHTML = shortcuts.map(s =>
+      `<div class="welcome-shortcut-row"><span class="welcome-shortcut-label">${s.label}</span><kbd>${s.key}</kbd></div>`
+    ).join('');
   }
 
   // 文件打开按钮
@@ -97,13 +114,43 @@ async function init() {
     await closeCurrentTab();
   });
 
-  // 窗口关闭前检查未保存修改
-  window.addEventListener('beforeunload', (e) => {
-    const hasUnsaved = state.tabs.some(t => t.isDirty) || state.isDirty;
-    if (hasUnsaved) {
-      e.preventDefault();
-      e.returnValue = '';
+  // 窗口关闭前检查未保存修改（通过主进程 IPC）
+  window.electronAPI.onBeforeClose(async () => {
+    // 先同步当前标签状态
+    const { snapshotCurrentTab } = await import('./tab.js');
+    snapshotCurrentTab();
+
+    // 检查所有标签页是否有未保存的修改
+    const unsavedTabs = state.tabs.filter(t => t.isDirty);
+    if (unsavedTabs.length === 0 && !state.isDirty) {
+      // 没有未保存修改，直接关闭
+      window.electronAPI.confirmClose();
+      return;
     }
+
+    // 逐个处理未保存的标签
+    for (const tab of unsavedTabs) {
+      const fileName = tab.filePath.split('/').pop() || tab.filePath.split('\\').pop() || '未命名文件';
+      // 0=保存, 1=放弃, 2=取消
+      const response = await window.electronAPI.showUnsavedDialog(fileName);
+      if (response === 0) {
+        // 保存
+        if (tab.fileType === 'markdown' || tab.fileType === 'txt') {
+          const result = await window.electronAPI.writeFile(tab.filePath, tab.rawContent);
+          if (!result.success) {
+            alert('保存失败: ' + result.error);
+            return; // 保存失败，取消关闭
+          }
+        }
+      } else if (response === 2) {
+        // 取消关闭
+        return;
+      }
+      // response === 1: 放弃修改，继续
+    }
+
+    // 全部处理完毕，确认关闭
+    window.electronAPI.confirmClose();
   });
 
   // 拖放

@@ -31,7 +31,7 @@ function createMenu(mainWindow) {
           accelerator: 'CmdOrCtrl+O',
           click: async () => {
             const result = await dialog.showOpenDialog(mainWindow, {
-              properties: ['openFile'],
+              properties: ['openFile', 'multiSelections'],
               filters: [
                 { name: '所有支持的文件', extensions: ['md', 'markdown', 'txt', 'pdf'] },
                 { name: 'Markdown', extensions: ['md', 'markdown'] },
@@ -40,7 +40,9 @@ function createMenu(mainWindow) {
               ]
             });
             if (!result.canceled && result.filePaths.length > 0) {
-              mainWindow.webContents.send('open-file', result.filePaths[0]);
+              for (const filePath of result.filePaths) {
+                mainWindow.webContents.send('open-file', filePath);
+              }
             }
           }
         },

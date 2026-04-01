@@ -110,8 +110,6 @@ export async function clearAllHistory() {
   const confirmed = confirm('确定要清空所有浏览记录吗？此操作不可撤销。');
   if (!confirmed) return;
 
-  for (const item of history) {
-    await window.electronAPI.removeHistory(item.path);
-  }
+  await window.electronAPI.clearHistory();
   await refreshHistory();
 }

@@ -1,4 +1,4 @@
-const { BrowserWindow } = require('electron');
+const { BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const { createMenu } = require('./menu');
 const { registerIpcHandlers } = require('./ipc');
@@ -32,9 +32,28 @@ function createWindow() {
     mainWindow.show();
   });
 
+  // 拦截窗口关闭事件，检查未保存修改
+  mainWindow.on('close', (e) => {
+    // 如果已经确认关闭，直接放行
+    if (mainWindow._forceClose) return;
+
+    e.preventDefault();
+    // 向渲染进程询问是否可以关闭
+    mainWindow.webContents.send('before-close');
+  });
+
   // IPC handlers 只需注册一次
   if (!ipcRegistered) {
     registerIpcHandlers(mainWindow);
+
+    // 渲染进程回复是否允许关闭
+    ipcMain.on('close-confirmed', () => {
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow._forceClose = true;
+        mainWindow.close();
+      }
+    });
+
     ipcRegistered = true;
   }
 

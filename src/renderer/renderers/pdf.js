@@ -4,7 +4,6 @@ import { escapeHtml, getFileName } from '../utils.js';
 import { updateEditorTab } from '../tab.js';
 import { clearOutline } from '../outline.js';
 import { updateStatusBarForPdf, updatePdfCurrentPage } from '../statusbar.js';
-import { refreshHistory } from '../history.js';
 
 let pdfjsInitialized = false;
 
@@ -319,10 +318,6 @@ export async function loadPdfFile(filePath) {
 
     // 更新状态栏
     updateStatusBarForPdf(fileName, totalPages);
-
-    // 添加历史
-    await window.electronAPI.addHistory(filePath);
-    await refreshHistory();
 
   } catch (error) {
     showError('PDF 加载失败: ' + error.message);

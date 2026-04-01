@@ -55,6 +55,12 @@ function registerIpcHandlers(mainWindow) {
     return filtered;
   });
 
+  // 清空所有历史记录
+  ipcMain.handle('clear-history', async () => {
+    writeHistory([]);
+    return [];
+  });
+
   // 打开文件对话框（支持多选）
   ipcMain.handle('open-file-dialog', async () => {
     const result = await dialog.showOpenDialog(mainWindow, {
