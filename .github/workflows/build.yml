@@ -45,11 +45,10 @@ jobs:
       - name: Install dependencies
         run: npm ci --ignore-optional
 
-      # 打包
+      # 打包（不传 GH_TOKEN，避免 electron-builder 自动上传到 Release，上传由 release job 统一处理）
       - name: Build
         run: ${{ matrix.build_cmd }}
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # macOS: 跳过代码签名和公证（无 Apple 开发者账号时必须）
           CSC_IDENTITY_AUTO_DISCOVERY: false
 
