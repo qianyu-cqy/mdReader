@@ -30,6 +30,8 @@ function createWindow() {
 
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
+    // 禁用 Electron 内置 pinch-to-zoom，改由渲染进程自行处理 PDF 缩放
+    mainWindow.webContents.setVisualZoomLevelLimits(1, 1);
   });
 
   // 将 findInPage 的搜索结果转发给渲染进程

@@ -1,5 +1,35 @@
 import dom from './dom.js';
 
+// 记录拖拽后的自定义宽度，以便展开时恢复
+let _outlineCustomWidth = null;
+
+/**
+ * 隐藏右侧大纲面板（统一入口）
+ */
+export function hideOutlinePanel() {
+  // 保存内联 width（如果被拖拽过）
+  const inlineW = dom.outlinePanel.style.width;
+  if (inlineW) {
+    _outlineCustomWidth = inlineW;
+  }
+  // 清除内联 width，让 .hidden 的 CSS width:0 能生效
+  dom.outlinePanel.style.width = '';
+  dom.outlinePanel.classList.add('hidden');
+  dom.outlineSash.classList.add('hidden');
+}
+
+/**
+ * 显示右侧大纲面板（统一入口）
+ */
+export function showOutlinePanel() {
+  // 恢复拖拽调整过的自定义宽度（如果有）
+  if (_outlineCustomWidth) {
+    dom.outlinePanel.style.width = _outlineCustomWidth;
+  }
+  dom.outlinePanel.classList.remove('hidden');
+  dom.outlineSash.classList.remove('hidden');
+}
+
 /**
  * 生成大纲（TOC）
  */
@@ -10,6 +40,7 @@ export function generateToc() {
   if (!markdownBody) {
     dom.tocList.innerHTML = emptyMsg;
     dom.tocListSidebar.innerHTML = emptyMsg;
+    hideOutlinePanel();
     return;
   }
 
@@ -18,6 +49,7 @@ export function generateToc() {
     const noHeadMsg = '<div class="empty-state-sm"><p>该文档没有标题</p></div>';
     dom.tocList.innerHTML = noHeadMsg;
     dom.tocListSidebar.innerHTML = noHeadMsg;
+    hideOutlinePanel();
     return;
   }
 
@@ -39,8 +71,7 @@ export function generateToc() {
   dom.tocListSidebar.appendChild(fragment2);
 
   // 显示大纲面板
-  dom.outlinePanel.classList.remove('hidden');
-  dom.outlineSash.classList.remove('hidden');
+  showOutlinePanel();
 }
 
 /**

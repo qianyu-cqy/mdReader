@@ -1,6 +1,6 @@
 import dom from './dom.js';
 import state, { generateTabId, getActiveTab } from './state.js';
-import { clearOutline } from './outline.js';
+import { clearOutline, hideOutlinePanel } from './outline.js';
 import { resetStatusBar } from './statusbar.js';
 import { resetSourceMode, checkUnsavedChanges, showModeToggle } from './source-mode.js';
 import { getFileName, getFileIcon } from './utils.js';
@@ -378,6 +378,10 @@ function showWelcome() {
   state.currentFileType = '';
   state.activeTabId = null;
 
+  // 移除 PDF 缩放工具栏
+  const zoomToolbar = document.getElementById('pdfZoomToolbar');
+  if (zoomToolbar) zoomToolbar.remove();
+
   dom.titlebarTitle.textContent = 'MD Reader';
   dom.currentPathDisplay.textContent = 'MD Reader';
 
@@ -425,8 +429,7 @@ function showWelcome() {
   }
 
   clearOutline('打开文件后显示大纲');
-  dom.outlinePanel.classList.add('hidden');
-  dom.outlineSash.classList.add('hidden');
+  hideOutlinePanel();
   showModeToggle(false);
   resetStatusBar();
   renderTabBar();

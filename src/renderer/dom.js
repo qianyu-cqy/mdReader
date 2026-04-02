@@ -24,6 +24,7 @@ const dom = {
   get breadcrumbBar() { return document.getElementById('breadcrumbBar'); },
   get content() { return document.getElementById('content'); },
   get currentPathDisplay() { return document.getElementById('currentPath'); },
+  get breadcrumbActions() { return document.querySelector('.breadcrumb-actions'); },
 
   // Buttons
   get openFileBtn() { return document.getElementById('openFileBtn'); },

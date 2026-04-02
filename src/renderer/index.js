@@ -3,7 +3,7 @@ import state from './state.js';
 import { initTheme, toggleTheme } from './theme.js';
 import { togglePanel, showPanel } from './sidebar.js';
 import { setupSashResize } from './sash.js';
-import { onContentScroll } from './outline.js';
+import { onContentScroll, hideOutlinePanel } from './outline.js';
 import { refreshHistory, clearAllHistory, setLoadFileCallback, setCloseTabCallback } from './history.js';
 import { openFile, loadFile, reloadTab } from './file-loader.js';
 import { closeCurrentTab, closeTab, initTabBar, setTabCallbacks, updateTabDirtyState } from './tab.js';
@@ -95,8 +95,7 @@ async function init() {
 
   // 大纲关闭
   dom.closeOutlineBtn.addEventListener('click', () => {
-    dom.outlinePanel.classList.add('hidden');
-    dom.outlineSash.classList.add('hidden');
+    hideOutlinePanel();
     dom.activityOutline.classList.remove('active');
   });
 
@@ -119,6 +118,15 @@ async function init() {
 
   // 滚动同步大纲
   dom.content.addEventListener('scroll', onContentScroll);
+
+  // 双击内容区域收起左侧侧边栏
+  dom.content.addEventListener('dblclick', (e) => {
+    // 避免在输入框/文本域中双击时触发（如 txt 编辑模式）
+    if (e.target.closest('textarea, input, [contenteditable]')) return;
+    if (state.activePanel) {
+      togglePanel(state.activePanel);
+    }
+  });
 
   // 菜单打开文件
   window.electronAPI.onOpenFile(async (filePath) => {

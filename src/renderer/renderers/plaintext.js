@@ -2,7 +2,7 @@ import dom from '../dom.js';
 import state from '../state.js';
 import { getFileName } from '../utils.js';
 import { updateEditorTab, updateTabDirtyState } from '../tab.js';
-import { clearOutline } from '../outline.js';
+import { clearOutline, hideOutlinePanel } from '../outline.js';
 import { updateStatusBar } from '../statusbar.js';
 import { initTxtEditMode } from '../source-mode.js';
 
@@ -60,8 +60,9 @@ export function renderPlainText(text, filePath) {
     });
   }
 
-  // 清空大纲
+  // 清空大纲并隐藏面板
   clearOutline('纯文本文件无大纲');
+  hideOutlinePanel();
 
   // 更新状态栏
   updateStatusBar(text, fileName);

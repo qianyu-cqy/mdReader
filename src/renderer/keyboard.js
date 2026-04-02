@@ -1,6 +1,5 @@
-import dom from './dom.js';
 import state from './state.js';
-import { togglePanel, showPanel, setActivityActive } from './sidebar.js';
+import { togglePanel, showPanel } from './sidebar.js';
 import { saveCurrentFile } from './source-mode.js';
 import { toggleSearch, isSearchVisible, hideSearch } from './search.js';
 
@@ -21,10 +20,7 @@ export function setupKeyboard() {
     if (isMod && e.key === 'b') {
       e.preventDefault();
       if (state.activePanel) {
-        dom.primarySidebar.classList.add('collapsed');
-        dom.sidebarSash.classList.add('hidden');
-        setActivityActive(null);
-        state.activePanel = null;
+        togglePanel(state.activePanel);
       } else {
         showPanel('explorer');
       }

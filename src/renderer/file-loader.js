@@ -74,6 +74,12 @@ export async function loadFile(filePath) {
  * @param {string} [rawContent] - 已有的原始内容（切换标签恢复时使用）
  */
 async function renderFileContent(filePath, fileType, rawContent) {
+  // 非 PDF 时移除缩放工具栏
+  if (fileType !== 'pdf') {
+    const zoomToolbar = document.getElementById('pdfZoomToolbar');
+    if (zoomToolbar) zoomToolbar.remove();
+  }
+
   if (fileType === 'pdf') {
     showModeToggle(false);
     await loadPdfFile(filePath);
